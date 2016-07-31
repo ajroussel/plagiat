@@ -26,7 +26,7 @@ from nltk.tokenize import word_tokenize
 
 import langid
 
-__version__ = '2016.06.26'
+__version__ = '2016.07.31'
 
 SENT_PUNCT = {hash(x) for x in ".!?;:"}
 """Set of punctuation marks that are considered to end a sentence (as hashes)."""
@@ -227,19 +227,28 @@ def mean(seq):
 
 def std_dev(seq):
     n = len(seq)
+    if n < 2:
+        print("(warning) can't compute std_dev for sequence:", seq)
+        return 0.0
     mean_seq = mean(seq)
     return math.sqrt(sum((seq[i] - mean_seq)**2 for i in range(n)) / (n - 1))
 
 
 def covariance(u, v):
     n = len(u)
+    if n < 2:
+        print("(warning) can't compute covariance for sequence:", u)
+        return 0.0
     mean_u = mean(u)
     mean_v = mean(v)
     return sum((u[i] - mean_u) * (v[i] - mean_v) for i in range(n)) / (n - 1)
 
 
 def corr_coef(u, v):
-    return covariance(u, v) / (std_dev(u) * std_dev(v))
+    divisor = std_dev(u) * std_dev(v)
+    if divisor == 0.0:
+        print("(warning) divisor is zero for sequence")
+    return covariance(u, v) / divisor
 
 
 def skip_bigrams(seq, w=4):
